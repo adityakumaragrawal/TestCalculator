@@ -1,0 +1,173 @@
+/**
+ * AURA_ENGINE — app.js
+ * CLAUDE_ARCHITECT_AGENT | Layer 1: State + Boot
+ * ─────────────────────────────────────────────
+ * Responsibilities:
+ *   - Global APP_STATE ownership
+ *   - Module registry + lifecycle orchestration
+ *   - Event bus (pub/sub)
+ *   - Router (hash-based, zero dependency)
+ */
+
+"use strict";
+
+// ─── GLOBAL STATE ────────────────────────────────────────────────────────────
+
+const APP_STATE = Object.seal({
+  currentTheme:    "dark",
+  currentModule:   null,        // string key into MODULE_REGISTRY
+  currentTimezone: "Asia/Kolkata",
+  appVersion:      "1.0.0",
+});
+
+// ─── EVENT BUS ───────────────────────────────────────────────────────────────
+// Decouples modules from each other. Modules emit; app.js routes.
+
+const AURA_BUS = (() => {
+  const _listeners = Object.create(null); // { eventName: Set<fn> }
+
+  return Object.freeze({
+    /**
+     * Subscribe to an event.
+     * @param {string} event
+     * @param {Function} fn
+     * @returns {Function} unsubscribe handle
+     */
+    on(event, fn) {
+      if (!_listeners[event]) _listeners[event] = new Set();
+      _listeners[event].add(fn);
+      return () => _listeners[event].delete(fn);   // teardown handle
+    },
+
+    /**
+     * Emit an event with an optional payload.
+     * @param {string} event
+     * @param {*} payload
+     */
+    emit(event, payload) {
+      (_listeners[event] || new Set()).forEach(fn => {
+        try { fn(payload); }
+        catch (err) { console.error(`[AURA_BUS] ${event}:`, err); }
+      });
+    },
+  });
+})();
+
+// ─── MODULE REGISTRY ─────────────────────────────────────────────────────────
+// Each entry is a lazy reference; modules are NOT imported until first use.
+// Structure mirrors the required moduleConfig / moduleState contract.
+
+const MODULE_REGISTRY = Object.freeze({
+  age:          () => import("./modules/age/age.js"),
+  time:         () => import("./modules/time/time.js"),
+  destinations: () => import("./modules/destinations/destinations.js"),
+});
+
+// Cache of already-resolved module objects
+const _moduleCache = new Map();
+
+// ─── MODULE LIFECYCLE ────────────────────────────────────────────────────────
+
+/**
+ * Load, initialise, and render a module by key.
+ * Guarantees each module is initialised exactly once (singleton pattern).
+ *
+ * @param {string} moduleKey  — key in MODULE_REGISTRY
+ * @returns {Promise<void>}
+ */
+async function activateModule(moduleKey) {
+  if (!(moduleKey in MODULE_REGISTRY)) {
+    console.warn(`[AURA_ENGINE] Unknown module: "${moduleKey}"`);
+    return;
+  }
+
+  // Teardown previous module if switching
+  if (APP_STATE.currentModule && APP_STATE.currentModule !== moduleKey) {
+    const prev = _moduleCache.get(APP_STATE.currentModule);
+    prev?.teardownModule?.();
+    AURA_BUS.emit("module:deactivated", APP_STATE.currentModule);
+  }
+
+  APP_STATE.currentModule = moduleKey;
+
+  let mod = _moduleCache.get(moduleKey);
+
+  if (!mod) {
+    const esModule = await MODULE_REGISTRY[moduleKey]();
+    mod = esModule.default ?? esModule;           // support default or named export
+    _moduleCache.set(moduleKey, mod);
+    mod.initializeModule();                       // one-time setup
+  }
+
+  mod.renderModule();
+  mod.bindModuleEvents();
+  AURA_BUS.emit("module:activated", moduleKey);
+}
+
+// ─── HASH ROUTER ─────────────────────────────────────────────────────────────
+// Routes: #age | #time | #destinations
+// Fallback: first registered module
+
+const AURA_ROUTER = (() => {
+  const DEFAULT_ROUTE = "age";
+
+  function _resolveHash() {
+    const hash = window.location.hash.replace("#", "").trim().toLowerCase();
+    return (hash in MODULE_REGISTRY) ? hash : DEFAULT_ROUTE;
+  }
+
+  function navigate(moduleKey) {
+    window.location.hash = moduleKey;             // triggers hashchange → activateModule
+  }
+
+  function _boot() {
+    window.addEventListener("hashchange", () => activateModule(_resolveHash()));
+    activateModule(_resolveHash());               // initial load
+  }
+
+  return Object.freeze({ navigate, boot: _boot });
+})();
+
+// ─── THEME MANAGER ───────────────────────────────────────────────────────────
+
+const AURA_THEME = (() => {
+  const ROOT = document.documentElement;
+  const STORAGE_KEY = "aura_theme";
+
+  const THEMES = Object.freeze({
+    dark:  "dark",
+    light: "light",
+  });
+
+  function applyTheme(theme) {
+    if (!THEMES[theme]) return;
+    APP_STATE.currentTheme = theme;
+    ROOT.setAttribute("data-theme", theme);
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch (_) { /* quota / SSR */ }
+    AURA_BUS.emit("theme:changed", theme);
+  }
+
+  function toggleTheme() {
+    applyTheme(APP_STATE.currentTheme === THEMES.dark ? THEMES.light : THEMES.dark);
+  }
+
+  function init() {
+    const stored = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; } })();
+    applyTheme(stored ?? THEMES.dark);
+  }
+
+  return Object.freeze({ init, applyTheme, toggleTheme });
+})();
+
+// ─── BOOT SEQUENCE ───────────────────────────────────────────────────────────
+
+document.addEventListener("DOMContentLoaded", () => {
+  AURA_THEME.init();
+  AURA_ROUTER.boot();
+  AURA_BUS.emit("app:ready", APP_STATE.appVersion);
+});
+
+// ─── PUBLIC SURFACE ──────────────────────────────────────────────────────────
+// Exposed for modules and utility layers. NOT for UI code.
+
+export { APP_STATE, AURA_BUS, AURA_ROUTER, AURA_THEME, activateModule };
