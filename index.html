@@ -8,9 +8,13 @@
   <link rel="stylesheet" href="styles/animations.css">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Adjust grid layout column allocation for 4 modules */
+    /* Expand grid system dynamically to align all 5 independent modular tabs */
     .navigation-tab-container {
-      grid-template-columns: repeat(4, 1fr) !important;
+      grid-template-columns: repeat(5, 1fr) !important;
+    }
+    .nav-tab-trigger {
+      font-size: 0.72rem !important;
+      padding: 6px 4px !important;
     }
   </style>
 </head>
@@ -26,24 +30,17 @@
 
       <nav class="navigation-tab-container">
         <button class="nav-tab-trigger active" data-module="destinations">Solver</button>
+        <button class="nav-tab-trigger" data-module="academic">Academic</button>
         <button class="nav-tab-trigger" data-module="time">Time Zone</button>
         <button class="nav-tab-trigger" data-module="age">Age Metric</button>
         <button class="nav-tab-trigger" data-module="unit">Unit Converter</button>
       </nav>
 
       <div id="destinations-container" class="module-view-panel active"></div>
+      <div id="academic-container" class="module-view-panel"></div>
       <div id="time-container" class="module-view-panel"></div>
       <div id="age-container" class="module-view-panel"></div>
       <div id="unit-container" class="module-view-panel"></div>
-
-      <footer style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); text-align: center; font-size: 0.78rem; color: #888; line-height: 1.5;">
-        <p style="margin: 0 0 6px 0; color: #eab308; font-weight: 500;">
-          ⚠️ This engine is currently in its starting phase and may have calculation issues. Kindly double check and verify critical analytics before implementation.
-        </p>
-        <p style="margin: 0; opacity: 0.7;">
-          &copy; 2026 All Rights Reserved.
-        </p>
-      </footer>
 
     </div>
   </div>
