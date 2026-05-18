@@ -5,16 +5,19 @@
 :root {
   /* High contrast visibility variables */
   --bg-main: #030712;
-  --bg-card: #111827;
-  --bg-input: #0f172a;
+  --bg-card: #0b0f19;
+  --bg-input: #111726;
   --text-main: #ffffff;
-  --text-muted: #9ca3af;
-  --border-glass: #374151;
-  --border-focus: #4b5563;
+  --text-muted: #64748b;
+  --border-glass: #1d263b;
+  --border-focus: #24324d;
   --accent-cyan: #38bdf8;
   --accent-magenta: #f43f5e;
-  --accent-cyan-glow: rgba(56, 189, 248, 0.25);
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --accent-cyan-glow: rgba(56, 189, 248, 0.15);
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Dynamic layout scaling variables */
+  --shell-width: 480px;
 }
 
 body {
@@ -27,20 +30,22 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #app-shell {
   width: 100%;
-  max-width: 480px;
+  max-width: var(--shell-width);
   padding: 24px;
+  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .module-mount-shell {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-glass) !important;
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
@@ -52,7 +57,7 @@ body {
 /* Tab Management Interface Framework Navigation Elements */
 .navigation-tab-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr) !important; /* Optimized grid alignment for 4 modules */
+  grid-template-columns: repeat(4, 1fr) !important;
   background: var(--bg-input) !important;
   padding: 6px !important;
   border-radius: 12px;
@@ -62,9 +67,9 @@ body {
 .nav-tab-trigger {
   background: transparent !important;
   border: none !important;
-  color: var(--text-muted) !important;
+  color: #94a3b8 !important;
   padding: 10px 0;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   border-radius: 8px;
@@ -76,9 +81,10 @@ body {
 }
 
 .nav-tab-trigger.active {
-  background: #1e293b !important;
+  background: #161f30 !important;
   color: var(--accent-cyan) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(56, 189, 248, 0.1);
 }
 
 /* Structural Card Form Layout Sequencing */
@@ -102,18 +108,18 @@ body {
 
 /* Typography Elements */
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.025em;
   margin: 0 0 4px 0;
-  background: linear-gradient(to right, var(--accent-cyan), var(--accent-magenta));
+  background: linear-gradient(to right, var(--accent-cyan), #60a5fa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .app-subtitle {
   font-size: 0.85rem;
-  color: var(--text-muted) !important;
+  color: #94a3b8 !important;
   margin: 0 0 8px 0;
 }
 
@@ -131,7 +137,7 @@ body {
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #e5e7eb !important; /* Fixed crisp high contrast readability */
+  color: #94a3b8 !important;
   margin-bottom: 6px;
   display: block;
 }
@@ -139,11 +145,11 @@ body {
 .input-group input,
 .input-group select {
   background: var(--bg-input) !important;
-  border: 2px solid var(--border-focus) !important; /* Thicker, high-contrast borders */
-  color: var(--text-main) !important; /* Clear white text visibility values */
+  border: 1px solid var(--border-focus) !important;
+  color: var(--text-main) !important;
   padding: 12px 14px !important;
-  border-radius: 12px;
-  font-size: 0.95rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
   font-weight: 500;
   transition: all 0.2s ease;
   outline: none;
@@ -164,7 +170,7 @@ body {
 }
 
 .input-group select option {
-  background-color: #0f172a !important; /* Fixed cross-browser dropdown background clipping */
+  background-color: #111726 !important;
   color: #ffffff !important;
   padding: 12px;
 }
@@ -173,31 +179,6 @@ body {
 .input-group select:focus {
   border-color: var(--accent-cyan) !important;
   box-shadow: 0 0 0 3px var(--accent-cyan-glow) !important;
-}
-
-/* Premium Component Badge Text Flags */
-.badge-highlight {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 800 !important;
-  font-size: 0.75rem !important;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  background-color: #2563eb !important; /* High intensity clear blue layer */
-  color: #ffffff !important;
-}
-
-.badge-success {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 800 !important;
-  font-size: 0.75rem !important;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  background-color: #16a34a !important; /* High intensity clear green layer */
-  color: #ffffff !important;
 }
 
 /* Action Trigger Components */
@@ -244,7 +225,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-muted) !important;
+  color: #64748b !important;
 }
 
 .currency-large-display {
@@ -296,79 +277,62 @@ body {
 
 /* Output Card Layout Container */
 .output-display-card {
-  background: #0f172a !important;
-  border: 2px solid #1e293b !important;
+  background: #111726 !important;
+  border: 1px solid #1d263b !important;
   border-radius: 16px;
   padding: 20px;
   text-align: center;
 }
 
-.output-value-string {
-  font-size: 0.85rem;
-  color: var(--text-muted) !important;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.output-primary-result {
-  color: var(--text-main) !important;
-  font-size: 2.1rem !important;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-family: 'Courier New', Courier, monospace !important;
-}
-
-/* Enhanced Analytics Display Layout Columns */
-.meta-details-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.sub-panel {
   width: 100%;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 18px;
-  margin-top: 4px;
-}
-
-.meta-detail-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  width: 100%;
-  background-color: #020617 !important;
-  border: 1px solid #334155 !important;
-  padding: 12px !important;
-  border-radius: 8px !important;
-}
-
-.meta-detail-item label {
-  color: #9ca3af !important;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.75px;
-  margin-bottom: 4px;
-}
-
-.meta-detail-item .value-container {
-  display: block;
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-family: monospace;
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-  color: #f1f5f9 !important; /* Perfect contrast numerical clarity */
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-glass);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
-  text-align: left;
+  animation: fadeInPanel 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.meta-detail-item .value-container.iso-theme {
+/* Keyframe Animations */
+@keyframes travelBead {
+  0% { left: 0%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInPanel {
+  from { opacity: 0; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+ * AX_MODIFIERS — Quick Realtime Text Modifier Active State Styles
+ * ────────────────────────────────────────────────────────────────────────────── */
+
+.ax-tool-btn {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-muted) !important;
+  padding: 8px 16px !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ax-tool-btn:hover {
+  color: var(--text-main) !important;
+  border-color: var(--border-focus) !important;
+}
+
+/* Styles the active toggle modifier state to glow Cyan matching the design system */
+.ax-tool-btn.active-tool {
+  background: #161f30 !important;
   color: var(--accent-cyan) !important;
-  border-color: rgba(14, 165, 233, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15) !important;
 }
-
-.text-right { text-align: right; }
