@@ -1,0 +1,446 @@
+/**
+ * NEXUS_FLOW — Advanced Physics & Chemistry Unit Conversion & Vector Math Module
+ * ────────────────────────────────────────────────────────────────────────────────
+ */
+
+"use strict";
+
+import { getEl } from "../../utils/helpers.js";
+
+const unitModule = {
+  renderModule() {
+    const container = getEl("unit-container");
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="input-row-vertical" style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <div class="input-group">
+          <label>Operational Domain</label>
+          <select id="unit-operational-mode" style="width: 100%; font-weight: 700;">
+            <option value="scalar" selected>Scalar Dimensional Analysis (Physics & Chemistry)</option>
+            <option value="vector">Vector Mechanics & Vector Law Engine (IIT-JEE / NEET)</option>
+          </select>
+        </div>
+
+        <div id="unit-scalar-panel" class="input-row-vertical" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="input-group">
+            <label>Academic Core Category</label>
+            <select id="unit-category" style="width: 100%;">
+              <option value="energy" selected>Physics: Energy / Work / Thermodynamics (J, eV, cal, erg, MeV)</option>
+              <option value="pressure">Physics/Chem: Pressure Systems (Pa, atm, bar, torr, mmHg, psi)</option>
+              <option value="amount">Chemistry: Stoichiometry & Substance (mol, mmol, kmol, atoms, molecules)</option>
+              <option value="temperature">Physics/Chem: Gas Laws / Thermal Scale (°C, K, °F, R)</option>
+              <option value="power">Physics: Power & Radiant Flux (W, kW, MW, hp, erg/s, eV/s)</option>
+              <option value="electrostatics">Physics: Charge & Potential (C, e, statC, V, statV)</option>
+              <option value="magnetic">Physics: Magnetism / Induction (T, G, Wb, Mx)</option>
+              <option value="atomic">Modern Physics: Mass-Energy Equivalents (kg, amu, MeV/c², g)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Input Magnitude Value</label>
+            <input type="number" id="unit-input-value" value="1" step="any" style="width: 100%;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="input-group">
+              <label>From Source Unit</label>
+              <select id="unit-source" style="width: 100%;"></select>
+            </div>
+            <div class="input-group">
+              <label>To Target Unit</label>
+              <select id="unit-target" style="width: 100%;"></select>
+            </div>
+          </div>
+        </div>
+
+        <div id="unit-vector-panel" class="input-row-vertical" style="display: none; flex-direction: column; gap: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-left: 3px solid #38bdf8; padding-left: 10px;">
+            <div class="input-group">
+              <label>Vector A Magnitude (|A|)</label>
+              <input type="number" id="vector-mag-a" value="3" step="any" style="width: 100%;">
+            </div>
+            <div class="input-group">
+              <label>Vector B Magnitude (|B|)</label>
+              <input type="number" id="vector-mag-b" value="4" step="any" style="width: 100%;">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Angle Between Vectors (θ in Degrees)</label>
+            <input type="number" id="vector-theta" value="90" step="any" style="width: 100%;">
+          </div>
+
+          <div class="input-group">
+            <label>Vector Operation / Law Base</label>
+            <select id="vector-operation" style="width: 100%;">
+              <option value="addition" selected>Parallelogram Law of Vector Addition (R = A + B)</option>
+              <option value="subtraction">Vector Subtraction Law (R = A - B)</option>
+              <option value="dot">Scalar Dot Product (A · B = |A||B|cosθ)</option>
+              <option value="cross">Vector Cross Product Magnitude (|A × B| = |A||B|sinθ)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <button id="unit-calculate-trigger" class="execution-btn" style="margin-top: 14px; width: 100%;">Compute Analytical Metrics</button>
+
+      <div class="market-pair-profile-row" style="margin-top: 16px; margin-bottom: 16px;">
+        <div class="currency-profile-block">
+          <span class="meta-label">Domain Matrix Source</span>
+          <div class="currency-large-display">
+            <span class="display-currency-label" id="unit-label-origin">-</span>
+          </div>
+        </div>
+        
+        <div class="market-vector-container">
+          <div class="vector-pulse-bead"></div>
+          <div class="market-vector-arrow">&rarr;</div>
+        </div>
+
+        <div class="currency-profile-block text-right">
+          <span class="meta-label">Output Framework Target</span>
+          <div class="currency-large-display style-right">
+            <span class="display-currency-label" id="unit-label-target">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-display-card" style="display: flex; flex-direction: column; gap: 18px; padding: 22px;">
+        <div>
+          <div class="output-value-string" id="unit-string-context" style="margin-bottom: 8px;">Dimensional Analysis Evaluation Metrics:</div>
+          <div class="output-primary-result" id="unit-calc-target" style="font-size: 2.1rem; line-height: 1.3; font-weight: 800; letter-spacing: -0.5px; word-break: break-word;">-</div>
+        </div>
+        
+        <div class="meta-details-grid" id="unit-metadata-container">
+          <div class="meta-detail-item">
+            <label id="unit-meta-left-title">Scientific Clean Format</label>
+            <div id="unit-meta-scientific" class="value-container">-</div>
+          </div>
+          
+          <div class="meta-detail-item">
+            <label id="unit-meta-right-title">SI Standard Metric Equivalent</label>
+            <div id="unit-meta-si" class="value-container iso-theme">-</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this._setupUnitDropdowns();
+    this._bindInterfaceSwitches();
+  },
+
+  _unitMetrics: {
+    energy: {
+      units: [
+        { id: "J", label: "Joule (J) [SI Unit Base]", factor: 1 },
+        { id: "eV", label: "Electronvolt (eV)", factor: 1.602176634e-19 },
+        { id: "MeV", label: "Megaelectronvolt (MeV)", factor: 1.602176634e-13 },
+        { id: "cal", label: "Thermodynamic Calorie (cal)", factor: 4.184 },
+        { id: "kcal", label: "Kilocalorie (kcal / Cal)", factor: 4184 },
+        { id: "erg", label: "CGS System: Erg (erg)", factor: 1e-7 },
+        { id: "kWh", label: "Kilowatt-hour (kWh)", factor: 3600000 },
+        { id: "Btu", label: "British Thermal Unit (Btu)", factor: 1055.06 }
+      ],
+      siLabel: "J"
+    },
+    pressure: {
+      units: [
+        { id: "Pa", label: "Pascal (Pa) / N/m² [SI Base]", factor: 1 },
+        { id: "atm", label: "Standard Atmosphere (atm)", factor: 101325 },
+        { id: "bar", label: "Bar (bar)", factor: 100000 },
+        { id: "torr", label: "Torr (torr / mmHg)", factor: 133.322368 },
+        { id: "psi", label: "Pounds per Sq Inch (psi)", factor: 6894.76 }
+      ],
+      siLabel: "Pa"
+    },
+    amount: {
+      units: [
+        { id: "mol", label: "Mole (mol) [SI Base]", factor: 1 },
+        { id: "mmol", label: "Millimole (mmol)", factor: 1e-3 },
+        { id: "kmol", label: "Kilomole (kmol)", factor: 1e3 },
+        { id: "atoms", label: "Elementary Atoms Count", factor: 1 / 6.02214076e23 },
+        { id: "molecules", label: "Molecular Entities Count", factor: 1 / 6.02214076e23 }
+      ],
+      siLabel: "mol"
+    },
+    temperature: {
+      units: [
+        { id: "C", label: "Celsius (°C)", factor: 1 },
+        { id: "K", label: "Kelvin (K) [SI Base]", factor: 1 },
+        { id: "F", label: "Fahrenheit (°F)", factor: 1 },
+        { id: "R", label: "Rankine (°R)", factor: 1 }
+      ],
+      siLabel: "K"
+    },
+    power: {
+      units: [
+        { id: "W", label: "Watt (W) / J/s [SI Base]", factor: 1 },
+        { id: "kW", label: "Kilowatt (kW)", factor: 1000 },
+        { id: "MW", label: "Megawatt (MW)", factor: 1000000 },
+        { id: "hp", label: "Imperial Horsepower (hp)", factor: 745.7 },
+        { id: "erg_s", label: "CGS Vector Force: erg/s", factor: 1e-7 },
+        { id: "eV_s", label: "Atomic Level: eV/s", factor: 1.602176634e-19 }
+      ],
+      siLabel: "W"
+    },
+    electrostatics: {
+      units: [
+        { id: "C", label: "Coulomb (C) [SI Base]", factor: 1 },
+        { id: "e", label: "Elementary Electronic Charge (e)", factor: 1.602176634e-19 },
+        { id: "statC", label: "CGS Fr / statCoulomb (statC)", factor: 3.33564e-10 },
+        { id: "V", label: "Volt (V) [SI Potential Base]", factor: 1 },
+        { id: "statV", label: "CGS Statvolt (statV)", factor: 299.792458 }
+      ],
+      siLabel: "SI Standard Metric Equivalent"
+    },
+    magnetic: {
+      units: [
+        { id: "T", label: "Tesla (T) [SI Field Base]", factor: 1 },
+        { id: "G", label: "Gauss (G) [CGS Field Base]", factor: 1e-4 },
+        { id: "Wb", label: "Weber (Wb) [SI Flux Base]", factor: 1 },
+        { id: "Mx", label: "Maxwell (Mx) [CGS Flux Base]", factor: 1e-8 }
+      ],
+      siLabel: "SI Metric Alignment"
+    },
+    atomic: {
+      units: [
+        { id: "kg", label: "Kilogram (kg) [SI Base]", factor: 1 },
+        { id: "g", label: "Gram (g)", factor: 1e-3 },
+        { id: "amu", label: "Unified Atomic Mass Unit (amu/u)", factor: 1.6605390666e-27 },
+        { id: "MeV_c2", label: "Relativistic Mass Energy: MeV/c²", factor: 1.78266192e-30 }
+      ],
+      siLabel: "kg"
+    }
+  },
+
+  _formatScientificSuperscript(num, fractionDigits = 4) {
+    const expStr = num.toExponential(fractionDigits); 
+    const segments = expStr.split("e");
+    if (segments.length !== 2) return expStr;
+
+    let base = segments[0];
+    let exponent = segments[1];
+
+    // Remove leading zeros or explicit positive signs from exponent string
+    exponent = exponent.replace("+", "");
+    if (exponent.startsWith("-")) {
+      exponent = "-" + exponent.slice(1).replace(/^0+/, "");
+    } else {
+      exponent = exponent.replace(/^0+/, "");
+    }
+    if (exponent === "" || exponent === "-") exponent = "0";
+
+    return `${base} &times; 10<sup>${exponent}</sup>`;
+  },
+
+  _setupUnitDropdowns() {
+    const category = getEl("unit-category").value;
+    const srcSelect = getEl("unit-source");
+    const tgtSelect = getEl("unit-target");
+    if (!srcSelect || !tgtSelect) return;
+
+    const optionsHtml = this._unitMetrics[category].units
+      .map(u => `<option value="${u.id}">${u.label}</option>`)
+      .join("");
+
+    srcSelect.innerHTML = optionsHtml;
+    tgtSelect.innerHTML = optionsHtml;
+
+    if (srcSelect.options.length > 1) {
+      tgtSelect.selectedIndex = 1;
+    }
+  },
+
+  _bindInterfaceSwitches() {
+    getEl("unit-operational-mode")?.addEventListener("change", (e) => {
+      const mode = e.target.value;
+      const scalarPanel = getEl("unit-scalar-panel");
+      const vectorPanel = getEl("unit-vector-panel");
+      
+      if (mode === "vector") {
+        scalarPanel.style.display = "none";
+        vectorPanel.style.display = "flex";
+        getEl("unit-meta-left-title").textContent = "Resultant Direction Matrix";
+        getEl("unit-meta-right-title").textContent = "Alternative Geometry";
+      } else {
+        scalarPanel.style.display = "flex";
+        vectorPanel.style.display = "none";
+        getEl("unit-meta-left-title").textContent = "Scientific Clean Format";
+        getEl("unit-meta-right-title").textContent = "SI Standard Metric Equivalent";
+        this._setupUnitDropdowns();
+      }
+      this._executeUnitCalculation();
+    });
+
+    getEl("unit-category")?.addEventListener("change", () => {
+      this._setupUnitDropdowns();
+      this._executeUnitCalculation();
+    });
+  },
+
+  bindModuleEvents() {
+    const trigger = getEl("unit-calculate-trigger");
+    trigger?.addEventListener("click", () => this._executeUnitCalculation());
+    this._executeUnitCalculation();
+  },
+
+  _executeUnitCalculation() {
+    const mode = getEl("unit-operational-mode").value;
+
+    if (mode === "vector") {
+      this._calculateVectorMetrics();
+    } else {
+      this._calculateScalarMetrics();
+    }
+  },
+
+  _calculateScalarMetrics() {
+    const category = getEl("unit-category").value;
+    const inputVal = parseFloat(getEl("unit-input-value").value);
+    const srcId = getEl("unit-source").value;
+    const tgtId = getEl("unit-target").value;
+
+    const resultDisplay = getEl("unit-calc-target");
+    const stringDisplay = getEl("unit-string-context");
+    const metaScientific = getEl("unit-meta-scientific");
+    const metaSi = getEl("unit-meta-si");
+
+    if (isNaN(inputVal)) {
+      resultDisplay.textContent = "Invalid Entry Scalar Metric";
+      return;
+    }
+
+    getEl("unit-label-origin").textContent = srcId;
+    getEl("unit-label-target").textContent = tgtId;
+
+    let valueInSI = 0;
+    let finalValue = 0;
+
+    const currentMetric = this._unitMetrics[category];
+    const srcUnit = currentMetric.units.find(u => u.id === srcId);
+    const tgtUnit = currentMetric.units.find(u => u.id === tgtId);
+
+    // Explicit handling for structural thermodynamic values
+    if (category === "temperature") {
+      if (srcId === "C") valueInSI = inputVal + 273.15;
+      else if (srcId === "F") valueInSI = (inputVal - 32) * 5 / 9 + 273.15;
+      else if (srcId === "R") valueInSI = inputVal * 5 / 9;
+      else valueInSI = inputVal;
+
+      if (tgtId === "C") finalValue = valueInSI - 273.15;
+      else if (tgtId === "F") finalValue = (valueInSI - 273.15) * 9 / 5 + 32;
+      else if (tgtId === "R") finalValue = valueInSI * 9 / 5;
+      else finalValue = valueInSI;
+    } else {
+      valueInSI = inputVal * srcUnit.factor;
+      finalValue = valueInSI / tgtUnit.factor;
+    }
+
+    let displayOutput = "";
+    if (Math.abs(finalValue) < 1e-3 || Math.abs(finalValue) > 1e5) {
+      displayOutput = this._formatScientificSuperscript(finalValue, 5);
+    } else {
+      displayOutput = Number(finalValue.toFixed(6)).toString();
+    }
+
+    stringDisplay.innerHTML = `Scalar dimensional transformation matrix execution metrics:`;
+    resultDisplay.innerHTML = `${displayOutput} <span style="color: #38bdf8; background-color: rgba(14, 165, 233, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(14, 165, 233, 0.25); font-size:1.4rem;">${tgtId}</span>`;
+
+    metaScientific.innerHTML = `<span class="badge-highlight" style="font-weight:800; background-color:#a855f7; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-right:6px;">POW</span>${this._formatScientificSuperscript(finalValue, 6)}`;
+    
+    let siUnitFormatString = "";
+    if (Math.abs(valueInSI) < 1e-3 || Math.abs(valueInSI) > 1e5) {
+      siUnitFormatString = this._formatScientificSuperscript(valueInSI, 4);
+    } else {
+      siUnitFormatString = Number(valueInSI.toFixed(6)).toString();
+    }
+    metaSi.innerHTML = `<span class="badge-success" style="font-weight:800; background-color:#22c55e; color:#fff; padding:2px 6px; border-radius:4px; font-size:0.75rem; margin-right:6px;">SI</span>${siUnitFormatString} ${currentMetric.siLabel}`;
+  },
+
+  _calculateVectorMetrics() {
+    const magA = parseFloat(getEl("vector-mag-a").value);
+    const magB = parseFloat(getEl("vector-mag-b").value);
+    const thetaDeg = parseFloat(getEl("vector-theta").value);
+    const operation = getEl("vector-operation").value;
+
+    const resultDisplay = getEl("unit-calc-target");
+    const stringDisplay = getEl("unit-string-context");
+    const metaLeft = getEl("unit-meta-scientific");
+    const metaRight = getEl("unit-meta-si");
+
+    if (isNaN(magA) || !isFinite(magA) || isNaN(magB) || !isFinite(magB) || isNaN(thetaDeg) || !isFinite(thetaDeg)) {
+      resultDisplay.textContent = "Invalid Vector Fields Input";
+      return;
+    }
+
+    getEl("unit-label-origin").textContent = "VEC A";
+    getEl("unit-label-target").textContent = "VEC B";
+
+    const thetaRad = (thetaDeg * Math.PI) / 180;
+    const cosTheta = Math.cos(thetaRad);
+    const sinTheta = Math.sin(thetaRad);
+
+    if (operation === "addition") {
+      // Parallelogram Law: R = sqrt(A² + B² + 2ABcosθ)
+      const resultantSq = (magA * magA) + (magB * magB) + (2 * magA * magB * cosTheta);
+      const resultant = Math.sqrt(Math.max(0, resultantSq));
+      
+      // Direction angle alpha relative to vector A: tan(α) = (B sinθ) / (A + B cosθ)
+      const denominator = magA + (magB * cosTheta);
+      let alphaDeg = 0;
+      if (Math.abs(denominator) > 1e-9) {
+        alphaDeg = (Math.atan2(magB * sinTheta, denominator) * 180) / Math.PI;
+      } else {
+        alphaDeg = 90; // Orthogonal projection limits
+      }
+
+      stringDisplay.innerHTML = `Resultant Magnitude Analysis via Vector Addition Law:`;
+      resultDisplay.innerHTML = `${Number(resultant.toFixed(5))} <span style="color: #a855f7; background-color: rgba(168, 85, 247, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(168, 85, 247, 0.25); font-size:1.2rem;">|R| Units</span>`;
+      
+      metaLeft.innerHTML = `<span class="badge-highlight" style="background-color:#38bdf8;">&alpha; w.r.t A</span> ${alphaDeg.toFixed(2)}&deg;`;
+      metaRight.innerHTML = `<span class="badge-success" style="background-color:#10b981;">R² Value</span> ${Number(resultantSq.toFixed(4))}`;
+
+    } else if (operation === "subtraction") {
+      // Vector Subtraction Law: R = sqrt(A² + B² - 2ABcosθ)
+      const resultantSq = (magA * magA) + (magB * magB) - (2 * magA * magB * cosTheta);
+      const resultant = Math.sqrt(Math.max(0, resultantSq));
+
+      const denominator = magA - (magB * cosTheta);
+      let alphaDeg = 0;
+      if (Math.abs(denominator) > 1e-9) {
+        alphaDeg = (Math.atan2(-magB * sinTheta, denominator) * 180) / Math.PI;
+      }
+
+      stringDisplay.innerHTML = `Resultant Vector Delta Magnitude (|A - B|):`;
+      resultDisplay.innerHTML = `${Number(resultant.toFixed(5))} <span style="color: #f43f5e; background-color: rgba(244, 63, 94, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(244, 63, 94, 0.25); font-size:1.2rem;">|&Delta;V| Units</span>`;
+      
+      metaLeft.innerHTML = `<span class="badge-highlight" style="background-color:#e11d48;">&alpha; Orientation</span> ${alphaDeg.toFixed(2)}&deg;`;
+      metaRight.innerHTML = `<span class="badge-success">Diff Scalar</span> ${Number((magA - magB).toFixed(4))}`;
+
+    } else if (operation === "dot") {
+      // Dot Product Scalar result
+      const dotProduct = magA * magB * cosTheta;
+
+      stringDisplay.innerHTML = `Scalar Dot Product Vector Evaluation Projection (A &middot; B):`;
+      resultDisplay.innerHTML = `${Number(dotProduct.toFixed(5))} <span style="color: #22c55e; background-color: rgba(34, 197, 94, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(34, 197, 94, 0.25); font-size:1.2rem;">Joules / Scalar</span>`;
+
+      metaLeft.innerHTML = `<span class="badge-highlight" style="background-color:#eab308;">cos(&theta;)</span> ${cosTheta.toFixed(4)}`;
+      metaRight.innerHTML = `<span class="badge-success">Orthogonal?</span> ${Math.abs(dotProduct) < 1e-7 ? "YES (90&deg;)" : "NO"}`;
+
+    } else if (operation === "cross") {
+      // Cross Product Magnitude result
+      const crossProductMag = magA * magB * sinTheta;
+
+      stringDisplay.innerHTML = `Vector Cross Product Area Magnitude Template (|A &times; B|):`;
+      resultDisplay.innerHTML = `${Number(crossProductMag.toFixed(5))} <span style="color: #38bdf8; background-color: rgba(14, 165, 233, 0.15); padding: 2px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(14, 165, 233, 0.25); font-size:1.2rem;">|N| Area Units</span>`;
+
+      metaLeft.innerHTML = `<span class="badge-highlight" style="background-color:#6366f1;">sin(&theta;)</span> ${sinTheta.toFixed(4)}`;
+      metaRight.innerHTML = `<span class="badge-success">Max Area Matrix</span> ${(magA * magB).toFixed(2)}`;
+    }
+  }
+};
+
+export default unitModule;
