@@ -7,6 +7,7 @@
 
 import { getEl } from "./utils/helpers.js";
 import destinationsModule from "./modules/destinations/destinations.js";
+import academicModule from "./modules/academic/academic.js"; // Fixed folder-nesting reference path!
 import timeModule from "./modules/time/time.js";
 import ageModule from "./modules/age/age.js";
 import unitModule from "./modules/unit/unit.js";
@@ -14,30 +15,42 @@ import unitModule from "./modules/unit/unit.js";
 const appCore = {
   modules: {
     destinations: destinationsModule,
+    academic: academicModule,
     time: timeModule,
     age: ageModule,
     unit: unitModule
   },
 
   init() {
-    document.addEventListener("DOMContentLoaded", () => {
-      this._renderAllModules();
-      this._bindGlobalNavigation();
-      this._initializeDefaultState();
-    });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => this._startLifecycle());
+    } else {
+      this._startLifecycle();
+    }
+  },
+
+  _startLifecycle() {
+    this._renderAllModules();
+    this._bindGlobalNavigation();
+    this._initializeDefaultState();
   },
 
   _renderAllModules() {
     Object.keys(this.modules).forEach(key => {
       try {
-        if (typeof this.modules[key].renderModule === "function") {
+        if (this.modules[key] && typeof this.modules[key].renderModule === "function") {
           this.modules[key].renderModule();
         }
-        if (typeof this.modules[key].bindModuleEvents === "function") {
+      } catch (error) {
+        console.error(`Render failure in module [${key}]:`, error);
+      }
+
+      try {
+        if (this.modules[key] && typeof this.modules[key].bindModuleEvents === "function") {
           this.modules[key].bindModuleEvents();
         }
       } catch (error) {
-        console.error(`Critical error inside app lifecycle layout execution for module [${key}]:`, error);
+        console.error(`Event binding failure in module [${key}]:`, error);
       }
     });
   },
@@ -54,11 +67,15 @@ const appCore = {
         e.currentTarget.classList.add("active");
 
         const panels = document.querySelectorAll(".module-view-panel");
-        panels.forEach(p => p.classList.remove("active"));
+        panels.forEach(p => {
+          p.classList.remove("active");
+          p.style.display = "none";
+        });
 
         const activePanel = getEl(`${selectedModule}-container`);
         if (activePanel) {
           activePanel.classList.add("active");
+          activePanel.style.display = "flex";
         }
       });
     });
@@ -71,6 +88,7 @@ const appCore = {
       const activePanel = getEl(`${activeModule}-container`);
       if (activePanel) {
         activePanel.classList.add("active");
+        activePanel.style.display = "flex";
       }
     }
   }
