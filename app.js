@@ -29,8 +29,7 @@ const appCore = {
     imageUtility: imageUtilityModule, // Key must match data-module="imageUtility"
   },
 
-  init() {
-    console.log("Nexus Flow Initializing...");
+   init() {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => this._startLifecycle());
     } else {
@@ -39,59 +38,53 @@ const appCore = {
   },
 
   _startLifecycle() {
+    this._renderAllModules();
     this._bindGlobalNavigation();
     this._initializeDefaultState();
   },
 
-  switchModule(moduleKey, triggerElement) {
-    console.log("Switching to:", moduleKey);
-    
-    // 1. Validation
-    const targetModule = this.modules[moduleKey];
-    if (!targetModule) {
-      console.error(`ERROR: Module '${moduleKey}' not found in appCore.modules!`);
-      return;
-    }
-
-    // 2. Destroy Others
+  _renderAllModules() {
     Object.keys(this.modules).forEach(key => {
-      if (key !== moduleKey && typeof this.modules[key]?.destroy === "function") {
-        this.modules[key].destroy();
+      try {
+        if (this.modules[key] && typeof this.modules[key].renderModule === "function") {
+          this.modules[key].renderModule();
+        }
+      } catch (error) {
+        console.error(`Render failure in module [${key}]:`, error);
+      }
+
+      try {
+        if (this.modules[key] && typeof this.modules[key].bindModuleEvents === "function") {
+          this.modules[key].bindModuleEvents();
+        }
+      } catch (error) {
+        console.error(`Event binding failure in module [${key}]:`, error);
       }
     });
-
-    // 3. UI Update
-    document.querySelectorAll(".nav-tab-trigger").forEach(t => t.classList.remove("active"));
-    triggerElement.classList.add("active");
-    
-    document.querySelectorAll(".module-view-panel").forEach(p => {
-      p.classList.remove("active");
-      p.style.display = "none";
-    });
-
-    const activePanel = document.getElementById(`${moduleKey}-container`);
-    if (!activePanel) {
-      console.error(`ERROR: Cannot find element with ID: ${moduleKey}-container`);
-      return;
-    }
-
-    activePanel.classList.add("active");
-    activePanel.style.display = "flex";
-    
-    // 4. Render
-    try {
-      if (typeof targetModule.renderModule === "function") targetModule.renderModule();
-      if (typeof targetModule.bindModuleEvents === "function") targetModule.bindModuleEvents();
-    } catch (err) {
-      console.error(`Render error in ${moduleKey}:`, err);
-    }
   },
 
   _bindGlobalNavigation() {
-    document.querySelectorAll(".nav-tab-trigger").forEach(trigger => {
+    const tabTriggers = document.querySelectorAll(".nav-tab-trigger");
+    
+    tabTriggers.forEach(trigger => {
       trigger.addEventListener("click", (e) => {
-        const modKey = e.currentTarget.getAttribute("data-module");
-        this.switchModule(modKey, e.currentTarget);
+        const selectedModule = e.currentTarget.getAttribute("data-module");
+        if (!selectedModule || !this.modules[selectedModule]) return;
+
+        tabTriggers.forEach(t => t.classList.remove("active"));
+        e.currentTarget.classList.add("active");
+
+        const panels = document.querySelectorAll(".module-view-panel");
+        panels.forEach(p => {
+          p.classList.remove("active");
+          p.style.display = "none";
+        });
+
+        const activePanel = getEl(`${selectedModule}-container`);
+        if (activePanel) {
+          activePanel.classList.add("active");
+          activePanel.style.display = "flex";
+        }
       });
     });
   },
@@ -99,7 +92,12 @@ const appCore = {
   _initializeDefaultState() {
     const activeTrigger = document.querySelector(".nav-tab-trigger.active");
     if (activeTrigger) {
-      this.switchModule(activeTrigger.getAttribute("data-module"), activeTrigger);
+      const activeModule = activeTrigger.getAttribute("data-module");
+      const activePanel = getEl(`${activeModule}-container`);
+      if (activePanel) {
+        activePanel.classList.add("active");
+        activePanel.style.display = "flex";
+      }
     }
   }
 };
