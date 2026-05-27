@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Calculator</title>
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="styles/animations.css">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* FIX: Grid layout prevents wrapping and "clipping" errors */
+    .navigation-tab-container {
+      display: grid !important;
+      grid-template-columns: repeat(9, 1fr); /* 9 modules currently visible */
+      gap: 2px !important;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(0,0,0,0.1);
+      padding: 4px;
+      border-radius: 8px;
+    }
+    
+    .nav-tab-trigger {
+      width: 100%;
+      font-size: 0.65rem !important;
+      padding: 8px 2px !important;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.03);
+      color: #fff;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .nav-tab-trigger.active {
+      background: rgba(84, 218, 244, 0.2);
+      border-color: #54daf4;
+    }
+
+    .module-view-panel { display: none !important; }
+    .module-view-panel.active { display: flex !important; flex-direction: column; }
+  </style>
+</head>
+<body>
+
+  <div id="app-shell">
+    <div class="module-mount-shell">
+      
+      <div class="header-section">
+        <h1 class="app-title">Simple Calculator</h1>
+        <p class="app-subtitle">Integrated Utility Core v2.0</p>
+      </div>
+
+      <nav class="navigation-tab-container">
+        <button class="nav-tab-trigger active" data-module="destinations">Solver</button>
+        <button class="nav-tab-trigger" data-module="academic">RGB Font</button>
+        <button class="nav-tab-trigger" data-module="media">Media</button>
+        <button class="nav-tab-trigger" data-module="typing">Typing</button>
+        <button class="nav-tab-trigger" data-module="time">Time</button>
+        <button class="nav-tab-trigger" data-module="age">Age</button>
+        <button class="nav-tab-trigger" data-module="unit">Unit</button>
+        <button class="nav-tab-trigger" data-module="weather">Weather</button>
+        <button class="nav-tab-trigger" data-module="imageUtility">Image</button>
+      </nav>
+
+      <div id="destinations-container" class="module-view-panel active"></div>
+      <div id="academic-container" class="module-view-panel"></div>
+      <div id="media-container" class="module-view-panel"></div>
+      <div id="typing-container" class="module-view-panel"></div>
+      <div id="time-container" class="module-view-panel"></div>
+      <div id="age-container" class="module-view-panel"></div>
+      <div id="unit-container" class="module-view-panel"></div>
+      <div id="weather-container" class="module-view-panel"></div>
+      <div id="imageUtility-container" class="module-view-panel"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
